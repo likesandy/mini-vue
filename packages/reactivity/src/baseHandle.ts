@@ -26,7 +26,7 @@ export function createSetter() {
     const result = Reflect.set(target, key, value, receiver)
 
     // 触发依赖
-    trigger(target, value)
+    trigger(target, key, value)
 
     return result
   }
