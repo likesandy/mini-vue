@@ -1,8 +1,11 @@
 import { isArray } from '@vue/shared'
 import { Dep, createDep } from './dep'
+import { ComputedRefImpl, computed } from './computer'
 
 // type KeyToDepMap = Map<unknown, ReactiveEffect>
 type KeyToDepMap = Map<unknown, Dep>
+
+export type EffectScheduler = (...args: any[]) => any
 /**
  * 收集所有依赖的 WeakMap 实例：
  * 1. `key`：响应性对象
@@ -54,25 +57,33 @@ export function trigger(target: object, key: string | symbol, value: unknown) {
 export function triggerEffects(dep: Dep) {
   const effects = isArray(dep) ? dep : [...dep]
   for (const effect of effects) {
-    triggerEffect(effect)
+    if (effect.computed) triggerEffect(effect)
+  }
+  for (const effect of effects) {
+    if (!effect.computed) triggerEffect(effect)
   }
 }
 
 export function triggerEffect(effect: ReactiveEffect) {
-  effect.run()
+  if (effect.scheduler) effect.scheduler()
+  else effect.run()
 }
 
-export function effect<T = unknown>(fn: () => T) {
+export function effect<T>(fn: () => T) {
   const _effect = new ReactiveEffect(fn)
   _effect.run()
 }
 
-export class ReactiveEffect<T = unknown> {
-  constructor(public fn: () => T) {}
+export class ReactiveEffect<T = any> {
+  computed?: ComputedRefImpl<T>
+  constructor(
+    public fn: () => T,
+    public scheduler: EffectScheduler | null = null
+  ) {}
 
   run() {
     activeEffect = this
-    this.fn()
+    return this.fn()
   }
 }
 

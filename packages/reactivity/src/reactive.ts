@@ -1,6 +1,10 @@
+import { isObject } from '@vue/shared'
 import { mutableHandlers } from './baseHandle'
 
 export const reactiveMap = new WeakMap<object, unknown>()
+
+export const toReactive = <T>(value: T): T =>
+  isObject(value) ? reactive(value as object) : value
 
 export function reactive(target: object) {
   return createReactiveObject(target, mutableHandlers, reactiveMap)
@@ -9,7 +13,7 @@ export function reactive(target: object) {
 function createReactiveObject(
   target: object,
   baseHandle: ProxyHandler<object>,
-  proxyMap: WeakMap<object, unknown>
+  proxyMap: WeakMap<object, any>
 ) {
   // 如果该实例已经被代理，则直接读取即可
   const existingProxy = proxyMap.get(target)

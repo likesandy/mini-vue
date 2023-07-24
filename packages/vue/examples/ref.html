@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <div id="app">
+    <p class="p1"></p>
+    <p class="p2"></p>
+  </div>
+  <script src="../dist/vue.js"></script>
+  <script>
+    const { ref, effect } = Vue
+    const obj = ref({
+      name: "tao"
+    })
+
+    effect(() => document.querySelector('.p1').textContent = obj.value.name)
+    effect(() => document.querySelector('.p2').textContent = obj.value.name)
+
+    setTimeout(() => {
+      obj.value.name = 'tao2'
+    }, 2000);
+  </script>
+</body>
+
+</html>
